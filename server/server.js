@@ -11,7 +11,7 @@ const app = express();
 
 // Middleware
 app.use(express.json());
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({ origin: ['https://mern-admin-auth.vercel.app/', 'http://localhost:5173'], credentials: true }));
 
 
 const MONGO_URL = process.env.MONGO_URL;
@@ -88,7 +88,7 @@ app.post('/api/login', async (req, res) => {
     // Create token
     const token = jwt.sign(
       { userId: user._id, isAdmin: user.isAdmin },
-      'your-secret-key',
+      process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
@@ -103,7 +103,7 @@ app.get('/api/dashboard', (req, res) => {
   const token = req.headers.authorization?.split(' ')[1];
   
   try {
-    const decoded = jwt.verify(token, 'your-secret-key');
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     if (!decoded.isAdmin) {
       return res.status(403).json({ message: 'Access denied' });
     }
@@ -113,5 +113,5 @@ app.get('/api/dashboard', (req, res) => {
   }
 });
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
