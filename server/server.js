@@ -1,20 +1,33 @@
 // server/server.js
 const express = require('express');
+const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
 
+dotenv.config();
 const app = express();
 
 // Middleware
 app.use(express.json());
 app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
 
-// MongoDB connection
-mongoose.connect('mongodb://localhost/sultanDB').then(() => {
-  console.log('Connected to MongoDB');
-}).catch(err => console.log('Failed to connect to MongoDB', err));
+
+const MONGO_URL = process.env.MONGO_URL;
+
+const connectDB = async () => {
+  try {
+    await mongoose.connect(MONGO_URL, {
+        serverSelectionTimeoutMS: 5000,
+    });
+    console.log(' Connected to MongoDB');
+  } catch (error) {
+    console.error(' Failed to connect to MongoDB:', error);
+    process.exit(1); // Exit the process on failure
+  }
+};
+connectDB();
 
 // User Schema
 const userSchema = new mongoose.Schema({
